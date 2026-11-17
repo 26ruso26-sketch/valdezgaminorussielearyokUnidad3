@@ -2,23 +2,298 @@
 // Prisma Schema - Prisma Business Dashboard
 // Grupo Prisma S.A.P.I. de C.V.
 // ==============================================================================
-
-generator client {
-  provider = "prisma-client-js"
-}
+// Motor: SQLite
+// Módulos: Seguridad, Socios, Proyectos, Tesorería, Operaciones, Aprobaciones,
+//          Libro Mayor Inmutable y Auditoría.
+// ==============================================================================
 
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// Modelo técnico de comprobación del motor de persistencia para Fase 1.
-// NOTA NORMATIVA: Las 28 entidades físicas del modelo relacional completo
-// de negocio (User, Role, Partner, Account, FinancialOperation, Project, etc.)
-// se implementarán formalmente durante la FASE 2 según el Plan Maestro.
-model HealthCheck {
-  id        String   @id @default(uuid())
-  status    String   @default("ok")
-  checkedAt DateTime @default(now())
+generator client {
+  provider = "prisma-client-js"
 }
 
+// ------------------------------------------------------------------------------
+// 1. MÓDULO DE SEGURIDAD Y ACCESOS
+// ------------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  userRoles           UserRole[]
+  partner             Partner?
+  projectsManagedUser Project[]            @relation("ProjectManagerUser")
+  operationsCreated   FinancialOperation[] @relation("OperationCreator")
+  operationsExecuted  FinancialOperation[] @relation("OperationExecutor")
+  signatures          ApprovalSignature[]  @relation("AuthorizerUser")
+  movementsRegistered AccountMovement[]   @relation("MovementRegistrar")
+  auditLogs           AuditLog[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  code        String   @unique // SUPER_ADMIN, PARTNER, TREASURER, FINANCE_APPROVER, PROJECT_MANAGER, PROJECT_MEMBER
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  code        String   @unique // users:manage, partners:read, treasury:operate, finance:approve, etc.
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+// ------------------------------------------------------------------------------
+// 2. MÓDULO DE SOCIOS Y ESTRUCTURA PATRIMONIAL
+// ------------------------------------------------------------------------------
+
+model Partner {
+  id                String   @id @default(uuid())
+  userId            String?  @unique
+  legalName         String
+  rfc               String?  @unique
+  phone             String?
+  status            String   @default("ACTIVO") // ACTIVO, INACTIVO
+  sharesBasisPoints Int      @default(1000) // 1000 = 10.00% (10 socios paritarios = 10,000 bps = 100%)
+  joinedAt          DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user                   User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projectsManagedPartner Project[] @relation("ProjectManagerPartner")
+
+  @@index([status])
+}
+
+// ------------------------------------------------------------------------------
+// 3. MÓDULO DE PROYECTOS DE INVERSIÓN
+// ------------------------------------------------------------------------------
+
+model Project {
+  id                 String    @id @default(uuid())
+  code               String    @unique // Ej. PRJ-AUTO-01, PRJ-INM-01
+  name               String
+  description        String?
+  category           String    @default("VEHICULAR") // VEHICULAR, INMOBILIARIO, OTRO
+  status             String    @default("PLANEACION") // PLANEACION, ACTIVO, EN_CIERRE, CONCLUIDO, CANCELADO
+  budgetAmountCents  BigInt    @default(0) // Presupuesto en centavos enteros
+  progressPercentage Int       @default(0) // 0 a 100%
+  managerPartnerId   String?
+  managerUserId      String?
+  startDate          DateTime  @default(now())
+  estimatedEndDate   DateTime?
+  actualEndDate      DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  managerPartner Partner?             @relation("ProjectManagerPartner", fields: [managerPartnerId], references: [id], onDelete: SetNull)
+  managerUser    User?                @relation("ProjectManagerUser", fields: [managerUserId], references: [id], onDelete: SetNull)
+  operations     FinancialOperation[]
+
+  @@index([status])
+  @@index([category])
+  @@index([managerPartnerId])
+}
+
+// ------------------------------------------------------------------------------
+// 4. MÓDULO DE TESORERÍA Y CUENTAS BANCARIAS
+// ------------------------------------------------------------------------------
+
+model Account {
+  id            String   @id @default(uuid())
+  name          String
+  accountType   String   @default("BANCARIA") // BANCARIA, CAJA_CHICA, FONDO_INVERSION
+  accountNumber String?  @unique
+  currency      String   @default("MXN")
+  balanceCents  BigInt   @default(0) // Saldo consolidado en centavos
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sourceOperations FinancialOperation[] @relation("SourceAccount")
+  targetOperations FinancialOperation[] @relation("TargetAccount")
+  movements        AccountMovement[]
+
+  @@index([accountType])
+  @@index([isActive])
+}
+
+// ------------------------------------------------------------------------------
+// 5. OPERACIONES FINANCIERAS Y REVERSIONES 1:N
+// ------------------------------------------------------------------------------
+
+model FinancialOperation {
+  id                  String    @id @default(uuid())
+  code                String    @unique // Folio unico ej. OP-2026-0001
+  concept             String
+  amountCents         BigInt    // Monto nominal entero en centavos
+  revertedAmountCents BigInt    @default(0) // Acumulador de reversiones parciales aplicadas
+  operationType       String    // EGRESO, INGRESO, TRANSFERENCIA, APORTACION_CAPITAL, REVERSION_EGRESO
+  status              String    @default("PENDIENTE_AUTORIZACION_1")
+  // Estados oficiales: BORRADOR, PENDIENTE_AUTORIZACION_1, PENDIENTE_AUTORIZACION_2, AUTORIZADO, EJECUTADO, RECHAZADO, REVERTIDO, REVERTIDO_PARCIAL
+
+  sourceAccountId  String?
+  targetAccountId  String?
+  projectId        String?
+  createdById      String
+  executedById     String?
+
+  confirmationRef  String?   // Folio de ticket, factura o referencia bancaria verificable
+  confirmationDate DateTime?
+
+  // Relacion recursiva 1:N para reversiones parciales acumulables
+  reversalOfOperationId String?
+  reversalOf            FinancialOperation?  @relation("OperationReversals", fields: [reversalOfOperationId], references: [id], onDelete: Restrict)
+  reversals             FinancialOperation[] @relation("OperationReversals")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sourceAccount   Account?         @relation("SourceAccount", fields: [sourceAccountId], references: [id], onDelete: Restrict)
+  targetAccount   Account?         @relation("TargetAccount", fields: [targetAccountId], references: [id], onDelete: Restrict)
+  project         Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy       User             @relation("OperationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  executedBy      User?            @relation("OperationExecutor", fields: [executedById], references: [id], onDelete: Restrict)
+  approvalRequest ApprovalRequest?
+  movements       AccountMovement[]
+
+  @@index([status])
+  @@index([operationType])
+  @@index([sourceAccountId])
+  @@index([targetAccountId])
+  @@index([projectId])
+  @@index([createdById])
+  @@index([reversalOfOperationId])
+}
+
+// ------------------------------------------------------------------------------
+// 6. GESTIÓN DE DOBLE APROBACIÓN Y FIRMAS INDEPENDIENTES
+// ------------------------------------------------------------------------------
+
+model ApprovalRequest {
+  id                   String   @id @default(uuid())
+  financialOperationId String   @unique
+  status               String   @default("PENDIENTE") // PENDIENTE, APROBADO, RECHAZADO
+  requiredSignatures   Int      @default(2) // Regla 2-Man fijada rígidamente en 2 firmas
+  currentSignatures    Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  operation  FinancialOperation  @relation(fields: [financialOperationId], references: [id], onDelete: Cascade)
+  signatures ApprovalSignature[]
+
+  @@index([status])
+}
+
+model ApprovalSignature {
+  id                String   @id @default(uuid())
+  approvalRequestId String
+  authorizerUserId  String
+  signatureOrder    Int      // 1 o 2
+  action            String   @default("APROBAR") // APROBAR, RECHAZAR
+  notes             String?  // Obligatorio en caso de rechazo
+  ipAddress         String   @default("127.0.0.1")
+  signedAt          DateTime @default(now())
+
+  request        ApprovalRequest @relation(fields: [approvalRequestId], references: [id], onDelete: Cascade)
+  authorizerUser User            @relation("AuthorizerUser", fields: [authorizerUserId], references: [id], onDelete: Restrict)
+
+  // Restricciones de integridad inquebrantables:
+  // 1. Un autorizador NO puede firmar dos veces la misma solicitud:
+  @@unique([approvalRequestId, authorizerUserId])
+  // 2. No pueden existir dos firmas con el mismo orden en la misma solicitud:
+  @@unique([approvalRequestId, signatureOrder])
+  @@index([authorizerUserId])
+}
+
+// ------------------------------------------------------------------------------
+// 7. LIBRO MAYOR INMUTABLE (ACCOUNT MOVEMENTS)
+// ------------------------------------------------------------------------------
+
+model AccountMovement {
+  id                    String   @id @default(uuid())
+  accountId             String
+  financialOperationId  String
+  movementType          String   // CARGO (resta saldo), ABONO (suma saldo)
+  amountCents           BigInt   // Monto entero en centavos > 0
+  resultingBalanceCents BigInt   // Saldo resultante exacto tras la aplicacion
+  bankReference         String?  // Folio de rastreo bancario SPEI o cheque
+  registeredById        String   // Usuario con rol TREASURER que efectuo el registro
+  registeredAt          DateTime @default(now()) // Inmutable: estrictamente append-only
+
+  account      Account            @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  operation    FinancialOperation @relation(fields: [financialOperationId], references: [id], onDelete: Restrict)
+  registeredBy User               @relation("MovementRegistrar", fields: [registeredById], references: [id], onDelete: Restrict)
+
+  @@index([accountId])
+  @@index([financialOperationId])
+  @@index([registeredById])
+  @@index([registeredAt])
+}
+
+// ------------------------------------------------------------------------------
+// 8. BITÁCORA DE AUDITORÍA TRANSVERSAL
+// ------------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String   // LOGIN, LOGOUT, CREATE_OPERATION, SIGN_APPROVAL, REVERSAL_REQUEST, EXECUTE_MOVEMENT, etc.
+  entity    String   // User, Partner, Account, FinancialOperation, etc.
+  entityId  String?
+  details   String?  // JSON con metadatos o resumen de cambios
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+}
