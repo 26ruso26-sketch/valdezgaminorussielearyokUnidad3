@@ -1,0 +1,66 @@
+# ==============================================================================
+# Prisma Business Dashboard - .gitignore
+# Grupo Prisma S.A.P.I. de C.V.
+# ==============================================================================
+
+# Node / Workspaces
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Compilados y builds
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# Variables de entorno y secretos (PROHIBIDO SUBIR A GIT)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+apps/api/.env
+apps/web/.env
+
+# Persistencia local SQLite (PROHIBIDO SUBIR A GIT)
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+*.sqlite3
+apps/api/prisma/*.db
+apps/api/prisma/*.sqlite
+apps/api/prisma/*.db-journal
+apps/api/prisma/*.db-wal
+
+# Almacenamiento local de evidencias y cargas de archivos
+apps/api/uploads/
+uploads/
+*.pdf
+*.jpg
+*.jpeg
+*.png
+
+# Cobertura y reportes de pruebas
+coverage/
+.nyc_output/
+
+# Logs del sistema
+logs/
+*.log
+
+# Archivos de sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+

@@ -1,0 +1,321 @@
+# TAREA: Inicialización documental de Prisma Business Dashboard
+
+Actúa como arquitecto de software y responsable de documentación técnica del proyecto.
+
+Necesito preparar el espacio de trabajo y crear toda la estructura documental que gobernará el desarrollo de **Prisma Business Dashboard**, un sistema de administración de socios, proyectos de inversión y finanzas para Grupo Prisma S.A.P.I. de C.V.
+
+## 1. RUTA DEL PROYECTO
+
+La carpeta raíz de trabajo es:
+
+`C:\Users\Russiele.Valdez\Documents\Ruso\UTC\ING\9 IDGSA\Desarrollo web Integral\Prisma Workspace`
+
+Dentro de esta carpeta debes crear:
+
+`Prisma Workspace\docs`
+
+IMPORTANTE:
+- Verifica que la carpeta raíz exista.
+- Si no existe, créala.
+- No elimines ni sobrescribas archivos existentes.
+- Si ya existe una carpeta docs, inspecciona su contenido antes de realizar cambios.
+- Trabaja exclusivamente dentro de esta ruta.
+
+## 2. OBJETIVO DE ESTA TAREA
+
+Por ahora NO debes desarrollar la aplicación.
+
+Tu única responsabilidad es crear la documentación, planificación, estructura de seguimiento y bitácora que utilizaremos durante todo el proyecto.
+
+La documentación deberá convertirse en nuestra fuente oficial de trabajo.
+
+No instales dependencias.
+No crees el frontend ni el backend.
+No crees todavía la base de datos.
+No ejecutes migraciones.
+No inicies servidores.
+No realices pruebas de software.
+No abras navegadores ni localhost.
+
+## 3. ESTRUCTURA DOCUMENTAL
+
+Crea la siguiente estructura:
+
+docs/
+│
+├── 00_GESTION_PROYECTO/
+│   ├── README_DOCUMENTACION.md
+│   ├── PROJECT_CHARTER.md
+│   ├── PLAN_MAESTRO.md
+│   ├── CONTROL_DE_CAMBIOS.md
+│   └── ESTADO_ACTUAL.md
+│
+├── 01_REQUISITOS/
+│   ├── REQUISITOS_FUNCIONALES.md
+│   ├── REQUISITOS_NO_FUNCIONALES.md
+│   ├── HISTORIAS_DE_USUARIO.md
+│   └── REGLAS_DE_NEGOCIO.md
+│
+├── 02_ARQUITECTURA/
+│   ├── ARQUITECTURA_SOFTWARE.md
+│   ├── PATRONES_DE_DISENO.md
+│   ├── ESTRUCTURA_PROYECTO.md
+│   └── SERVICIOS_WEB.md
+│
+├── 03_BASE_DE_DATOS/
+│   ├── MODELO_ENTIDAD_RELACION.md
+│   ├── DICCIONARIO_DE_DATOS.md
+│   └── REGLAS_INTEGRIDAD.md
+│
+├── 04_SEGURIDAD_Y_FINANZAS/
+│   ├── MODELO_ROLES_PERMISOS.md
+│   ├── REGLAS_FINANCIERAS.md
+│   ├── FLUJO_AUTORIZACIONES.md
+│   └── AUDITORIA_Y_TRAZABILIDAD.md
+│
+├── 05_PLANIFICACION/
+│   ├── PRODUCT_BACKLOG.md
+│   ├── ROADMAP.md
+│   ├── CRITERIOS_ACEPTACION.md
+│   └── SEGUIMIENTO_FASES.md
+│
+├── 06_PRUEBAS/
+│   ├── ESTRATEGIA_PRUEBAS.md
+│   ├── CASOS_PRUEBA.md
+│   └── REGISTRO_RESULTADOS.md
+│
+├── 07_ENTREGA_ACADEMICA/
+│   ├── REQUISITOS_UNIDAD_3.md
+│   ├── MATRIZ_EVIDENCIAS.md
+│   └── PENDIENTES_ENTREGA.md
+│
+└── BITACORA/
+    ├── BITACORA_SESIONES.md
+    ├── PLANTILLA_CIERRE_SESION.md
+    └── PROXIMA_SESION.md
+
+## 4. DEFINICIÓN DEL PROYECTO
+
+Nombre: Prisma Business Dashboard.
+
+Organización: Grupo Prisma S.A.P.I. de C.V.
+
+Objetivo:
+Desarrollar una aplicación web para administrar los socios, las cuentas financieras, los movimientos de dinero, los proyectos de inversión, sus responsables, avances, documentación, reuniones y resultados económicos.
+
+### Stack tecnológico confirmado
+
+Frontend:
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- Recharts
+
+Backend:
+- NestJS
+- TypeScript
+- API REST
+- JWT
+- bcrypt
+
+Persistencia:
+- SQLite
+- Prisma ORM
+
+Pruebas:
+- Jest
+- Supertest
+
+Documentación de API:
+- Swagger / OpenAPI
+
+Repositorio independiente:
+- prisma-business-dashboard
+
+## 5. REGLAS DE NEGOCIO CONFIRMADAS
+
+Estas decisiones ya fueron aprobadas y no debes modificarlas unilateralmente.
+
+### Socios
+- El grupo comienza con 10 socios fundadores.
+- Cada socio tiene inicialmente el 10% de participación.
+- El SUPER_ADMIN es uno de los diez socios.
+- La participación societaria, las aportaciones y la distribución de utilidades son conceptos independientes.
+- La administración de socios corresponde al SUPER_ADMIN.
+
+### Financiamiento
+- Los proyectos se financiarán mediante capital común del grupo.
+- Las cuentas financieras serán administradas dentro del sistema.
+- Cada movimiento deberá tener trazabilidad.
+- Las transferencias entre cuentas propias no representan ingresos ni gastos del grupo.
+- Los saldos serán calculados mediante movimientos confirmados.
+
+### Autorizaciones
+- Toda operación financiera requiere dos autorizaciones.
+- Los autorizadores deben ser personas diferentes.
+- El solicitante no puede autorizar su propia operación.
+- El SUPER_ADMIN no puede omitir esta regla.
+- Los movimientos ejecutados no podrán eliminarse.
+- Los errores financieros deberán corregirse mediante operaciones de reversión documentadas.
+- El sistema registrará quién solicitó, quién autorizó y quién registró la ejecución.
+
+### Utilidades
+- La distribución de utilidades se definirá individualmente para cada proyecto.
+- Cada proyecto tendrá un acuerdo económico.
+- Los porcentajes deberán sumar exactamente 100%.
+- La distribución definitiva requiere cierre financiero y acuerdo aprobado.
+
+### Proyectos
+Cada proyecto debe permitir administrar:
+- Nombre y descripción.
+- Tipo de inversión.
+- Fecha de inicio.
+- Fecha estimada de conclusión.
+- Responsable.
+- Integrantes.
+- Inversión inicial.
+- Presupuesto autorizado.
+- Gastos ejecutados.
+- Precio de venta estimado.
+- Utilidad proyectada.
+- Tiempo total y restante.
+- Días de atraso.
+- Porcentaje de avance.
+- Hitos.
+- Fotografías y documentos.
+- Minutas de reuniones.
+- Actividades pendientes.
+- Cierre financiero.
+
+Casos de uso iniciales:
+1. Compra y reventa de automóviles adquiridos en remates.
+2. Compra, adecuación y venta de inmuebles adquiridos en remates bancarios.
+
+### Seguridad
+- Separación entre roles y permisos.
+- Protección de endpoints.
+- Autenticación.
+- Auditoría de actividades críticas.
+- Protección de archivos y datos sensibles.
+
+### Base de datos
+- SQLite será la base de datos interna.
+- Prisma ORM administrará el acceso.
+- Los importes monetarios se almacenarán como enteros en centavos.
+- El frontend nunca tendrá acceso directo al archivo SQLite.
+- El archivo de base de datos y los secretos no deberán publicarse en GitHub.
+- Las evidencias y documentos tendrán metadatos en la base de datos.
+
+## 6. PLAN MAESTRO DE DESARROLLO
+
+Documenta las siguientes fases en PLAN_MAESTRO.md:
+
+FASE 0: Definición y documentación.
+FASE 1: Configuración del entorno y repositorio.
+FASE 2: Modelo de datos y migraciones SQLite.
+FASE 3: Autenticación, usuarios, socios y permisos.
+FASE 4: Tesorería, cuentas, movimientos y autorizaciones.
+FASE 5: Administración de proyectos y seguimiento.
+FASE 6: Dashboard ejecutivo.
+FASE 7: Web Services propios y terceros.
+FASE 8: Pruebas, seguridad y QA.
+FASE 9: Publicación, evidencias y documento académico PDF.
+
+Cada fase deberá incluir:
+- Objetivo.
+- Actividades.
+- Dependencias.
+- Entregables.
+- Criterios de aceptación.
+- Pruebas requeridas.
+- Estado actual.
+
+Las fases deben ejecutarse en orden. No se debe comenzar una fase nueva sin validar los criterios de salida de la anterior.
+
+## 7. BITÁCORA OBLIGATORIA
+
+Este punto es especialmente importante.
+
+Necesito que BITACORA_SESIONES.md sea el historial de todas las sesiones de desarrollo.
+
+Al finalizar cada sesión de trabajo debes registrar:
+
+1. Fecha y hora.
+2. Fase actual.
+3. Objetivo de la sesión.
+4. Actividades realizadas.
+5. Archivos creados.
+6. Archivos modificados.
+7. Funcionalidades terminadas.
+8. Pruebas ejecutadas y resultados reales.
+9. Errores o problemas encontrados.
+10. Decisiones tomadas.
+11. Actividades pendientes.
+12. Siguiente actividad exacta para continuar.
+
+No inventes actividades realizadas, pruebas exitosas ni resultados.
+
+ESTADO_ACTUAL.md deberá mantener un resumen actualizado del estado general del proyecto.
+
+PROXIMA_SESION.md deberá indicar concretamente:
+- Dónde nos quedamos.
+- Qué debemos hacer primero al regresar.
+- Qué archivos debemos consultar.
+- Qué dependencias o bloqueos existen.
+- Qué resultado esperamos obtener en la próxima sesión.
+
+PLANTILLA_CIERRE_SESION.md contendrá un formato reutilizable para documentar cada cierre.
+
+## 8. REGLAS DE TRABAJO PARA TODAS LAS SESIONES FUTURAS
+
+Estas reglas deben quedar escritas en README_DOCUMENTACION.md:
+
+1. Leer ESTADO_ACTUAL.md y PROXIMA_SESION.md antes de comenzar cualquier sesión.
+2. Consultar PLAN_MAESTRO.md para verificar la fase vigente.
+3. Consultar los documentos técnicos relacionados con la actividad.
+4. No avanzar fases sin cumplir sus criterios de aceptación.
+5. No modificar reglas de negocio aprobadas sin autorización expresa del propietario del proyecto.
+6. Si aparece una contradicción técnica, documentarla y proponer una solución antes de cambiar el diseño.
+7. No asumir que una tarea está terminada únicamente porque el código compila.
+8. Registrar los cambios relevantes en la bitácora.
+9. Al cerrar sesión, actualizar la bitácora, ESTADO_ACTUAL.md y PROXIMA_SESION.md.
+10. Cada avance implementado deberá poder relacionarse con una historia de usuario o tarea del backlog.
+11. No ejecutar validaciones, servidores, automatizaciones ni instalaciones de dependencias sin autorización expresa del propietario.
+12. No modificar archivos fuera del alcance de la tarea solicitada.
+
+El propietario del proyecto es quien toma las decisiones finales. El agente debe actuar como asesor técnico y ejecutor, no modificar unilateralmente el alcance.
+
+## 9. METODOLOGÍA
+
+Documenta que utilizaremos una metodología ágil inspirada en Scrum, con:
+- Product Backlog.
+- Historias de usuario.
+- Priorización.
+- Iteraciones de desarrollo.
+- Criterios de aceptación.
+- Revisión de avances.
+- Retrospectiva y bitácora.
+
+No inventes fechas de finalización ni compromisos temporales.
+
+## 10. ENTREGA DE ESTA TAREA
+
+Cuando termines:
+
+1. Verifica que todos los archivos documentales solicitados hayan sido creados.
+2. Asegúrate de que los documentos tengan contenido inicial coherente, no solamente títulos vacíos.
+3. Identifica claramente las decisiones confirmadas y las pendientes de definición.
+4. Crea una primera entrada en BITACORA_SESIONES.md que indique que se realizó la inicialización documental.
+5. Actualiza ESTADO_ACTUAL.md.
+6. Actualiza PROXIMA_SESION.md indicando que el siguiente paso será revisar y aprobar la documentación de la Fase 0.
+7. Entrega un resumen indicando:
+   - Ruta donde creaste los archivos.
+   - Carpetas creadas.
+   - Documentos generados.
+   - Decisiones pendientes.
+   - Siguiente actividad recomendada.
+
+IMPORTANTE: esta tarea termina cuando la estructura documental esté creada y revisada. No comiences la implementación del software.
+
+La documentación debe ser clara, profesional, consistente y escrita en español.

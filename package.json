@@ -1,0 +1,35 @@
+{
+  "name": "prisma-business-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema de administración de socios, proyectos de inversión y finanzas para Grupo Prisma S.A.P.I. de C.V.",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:api": "npm run build --workspace=apps/api",
+    "build:web": "npm run build --workspace=apps/web",
+    "start:api": "npm run start --workspace=apps/api",
+    "start:api:dev": "npm run start:dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "prisma:generate": "npm run prisma:generate --workspace=apps/api",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "keywords": [
+    "prisma",
+    "dashboard",
+    "monorepo",
+    "workspaces",
+    "nestjs",
+    "react",
+    "vite",
+    "typescript",
+    "sqlite",
+    "tailwind"
+  ],
+  "author": "Grupo Prisma S.A.P.I. de C.V.",
+  "license": "UNLICENSED"
+}
+

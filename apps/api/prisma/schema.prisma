@@ -1,0 +1,24 @@
+// ==============================================================================
+// Prisma Schema - Prisma Business Dashboard
+// Grupo Prisma S.A.P.I. de C.V.
+// ==============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo técnico de comprobación del motor de persistencia para Fase 1.
+// NOTA NORMATIVA: Las 28 entidades físicas del modelo relacional completo
+// de negocio (User, Role, Partner, Account, FinancialOperation, Project, etc.)
+// se implementarán formalmente durante la FASE 2 según el Plan Maestro.
+model HealthCheck {
+  id        String   @id @default(uuid())
+  status    String   @default("ok")
+  checkedAt DateTime @default(now())
+}
+
